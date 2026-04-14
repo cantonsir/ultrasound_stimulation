@@ -293,7 +293,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--mask", type=Path,
-        default=ROOT_DIR / "sham_audio_realistic_with_noise" / "sham_replica_2000Hz.wav",
+        default=ROOT_DIR / "sham_audio_realistic_with_noise" / "sham_crackle_n1_hp5000Hz_00.wav",
         help="WAV file for audio mask"
     )
     parser.add_argument(
@@ -305,7 +305,7 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Total stimulus duration (s)")
     parser.add_argument("--freq", type=int, default=265,
                         help="Carrier frequency (kHz)")
-    parser.add_argument("--vpp", type=int, default=250,
+    parser.add_argument("--vpp", type=int, default=297,
                         help="Driving voltage (mVpp)")
     parser.add_argument("--duty", type=float, default=0.1,
                         help="Duty cycle (0–1)")
