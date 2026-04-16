@@ -37,7 +37,8 @@ A comprehensive Python-based control system for Transcranial Ultrasound Stimulat
 ├── scripts/                   # Experiment and utility execution scripts
 │   ├── run_stimulus.py        # Main stimulation runner (interactive + scripted)
 │   ├── run_psychophysics.py   # US vs sham-audio psychophysics experiment
-│   └── gen_sham_audio.py      # Generator for auditory masking files
+│   ├── gen_sham_audio.py      # Generator for auditory masking files
+│   └── play_sham.py           # Utility to play a sham audio file directly
 ├── src/
 │   └── utils/                 # Core drivers and utilities
 │       ├── sg33500B.py        # Siglent AWG hardware interface
@@ -55,13 +56,23 @@ Standard auditory masks are pre-provided. You only need to run this if you want 
 python scripts/gen_sham_audio.py
 ```
 
-### 2. Run a Stimulation Session — Interactive (recommended)
+### 2. Play Auditory Masks Directly (Optional)
+If you want to just listen to a sham file continuously without running a stimulus protocol, use:
+```bash
+# Play the default sham audio
+python scripts/play_sham.py
+
+# Play a specific file
+python scripts/play_sham.py path/to/your/sham.wav
+```
+
+### 3. Run a Stimulation Session — Interactive (recommended)
 Launch with no arguments to walk through an interactive setup that asks for hardware mode, preset, audio mask, and Brainsight connection:
 ```bash
 python scripts/run_stimulus.py
 ```
 
-### 3. Run a Stimulation Session — Scripted
+### 4. Run a Stimulation Session — Scripted
 Use explicit flags when you need reproducible, unattended runs. All parameters have sensible defaults (see table below), so you only need to pass the ones you want to override:
 ```bash
 # Run with all defaults on real hardware
@@ -74,7 +85,7 @@ python scripts/run_stimulus.py --real --prf 10 --duration 120
 python scripts/run_stimulus.py --real --prf 5 --duty 0.1 --duration 80 --vpp 297 --freq 265
 ```
 
-### 4. Brainsight Recording
+### 5. Brainsight Recording
 Brainsight Polaris tracking is recorded **in parallel by default** when running a session. Connection defaults to `192.168.1.6:60000`. If Brainsight is unreachable, the script prints a warning and continues the ultrasound session without tracking.
 
 ```bash
