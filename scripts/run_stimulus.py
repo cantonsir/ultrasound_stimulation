@@ -503,6 +503,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-mask", action="store_true",
         help="Do NOT play the audio mask"
     )
+    parser.add_argument(
         "--mask", type=Path, default=_default_mask_file(),
         help="WAV file for audio mask"
     )
@@ -521,6 +522,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--log-dir", type=Path, default=DEFAULT_LOG_DIR,
         help="Directory for TSV logs"
+    )
     return parser
 
 
