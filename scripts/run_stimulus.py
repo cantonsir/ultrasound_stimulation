@@ -77,6 +77,8 @@ def _default_mask_file() -> Path:
 
 @dataclass
 class Config:
+    participant_id: str       # participant identifier
+
     # Ultrasound parameters
     center_freq_khz: int      # carrier frequency in kHz
     input_vpp_mv: int         # driving voltage in mVpp
@@ -107,7 +109,8 @@ class Logger:
     def __init__(self, cfg: Config, stamp: Optional[str] = None):
         self.start_time = time.time()
         now = _dt.datetime.now()
-        self.stamp = stamp or f"{now:%Y-%m-%d-%H.%M.%S}"
+        base_stamp = stamp or f"{now:%Y-%m-%d-%H.%M.%S}"
+        self.stamp = f"{cfg.participant_id}-{base_stamp}"
         fname = f"log-{self.stamp}.tsv"
         self.path = cfg.log_dir / fname
         cfg.log_dir.mkdir(parents=True, exist_ok=True)
@@ -391,6 +394,9 @@ def interactive_config() -> Config:
     print("  Ultrasound Stimulation — Interactive Setup")
     print("=" * 60)
 
+    # 0. Participant ID
+    participant_id = _prompt("\nParticipant ID", "test_subj", str)
+
     # 1. Hardware mode
     mode = _prompt_choice(
         "\nHardware mode:",
@@ -420,7 +426,7 @@ def interactive_config() -> Config:
 
     # 3. Audio mask
     print()
-    mask_on = _prompt_yes_no("Play auditory mask?", default=True)
+    mask_on = _prompt_yes_no("Play auditory mask?", default=False)
     if mask_on:
         mask_path = _prompt("  Mask WAV file", _default_mask_file(), Path)
     else:
@@ -438,6 +444,7 @@ def interactive_config() -> Config:
         bs_port = DEFAULT_BRAINSIGHT_PORT
 
     cfg = Config(
+        participant_id=participant_id,
         center_freq_khz=center_freq_khz,
         input_vpp_mv=input_vpp_mv,
         duty_cycle=duty_cycle,
@@ -456,6 +463,7 @@ def interactive_config() -> Config:
     print("\n" + "-" * 60)
     print("  Session summary")
     print("-" * 60)
+    print(f"  Participant : {participant_id}")
     print(f"  Hardware    : {'MOCK' if mock_hardware else 'REAL (Siglent AWG)'}")
     print(f"  Carrier     : {center_freq_khz} kHz")
     print(f"  Voltage     : {input_vpp_mv} mVpp")
@@ -480,6 +488,10 @@ def interactive_config() -> Config:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Continuous ultrasound pulsing with optional audio mask + Brainsight recording"
+    )
+    parser.add_argument(
+        "--participant", type=str, default="test_subj",
+        help="Participant ID for logging [default: test_subj]"
     )
     parser.add_argument(
         "--interactive", action="store_true",
@@ -528,6 +540,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def _config_from_args(args) -> Config:
     return Config(
+        participant_id=args.participant,
         center_freq_khz=args.freq,
         input_vpp_mv=args.vpp,
         duty_cycle=args.duty,
