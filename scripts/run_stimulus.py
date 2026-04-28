@@ -402,27 +402,35 @@ def interactive_config() -> Config:
         "\nHardware mode:",
         [
             ("mock", "Mock (no hardware — safe for dry runs)"),
+            ("sham", "Sham (audio mask only, no ultrasound)"),
             ("real", "Real hardware (Siglent AWG via USB-VISA)"),
         ],
         default_idx=0,
     )
-    mock_hardware = (mode == "mock")
+    mock_hardware = (mode in ("mock", "sham"))
 
     # 2. Stimulation parameters — blank to accept default, or enter a new value.
-    print(
-        f"\nStimulation parameters "
-        f"(press Enter to accept default shown in [brackets]):"
-    )
-    prf_hz = _prompt("  PRF (Hz)", DEFAULT_PRF_HZ, int,
-                     lambda v: None if v > 0 else "must be > 0")
-    duty_cycle = _prompt("  Duty cycle (0-1)", DEFAULT_DUTY_CYCLE, float,
-                         lambda v: None if 0 < v <= 1 else "must be in (0, 1]")
-    input_vpp_mv = _prompt("  Voltage (mVpp)", DEFAULT_VPP_MV, int,
-                           lambda v: None if v > 0 else "must be > 0")
-    center_freq_khz = _prompt("  Carrier frequency (kHz)", DEFAULT_FREQ_KHZ, int,
-                              lambda v: None if v > 0 else "must be > 0")
-    total_exposure_s = _prompt("  Duration (s)", DEFAULT_DURATION_S, int,
+    if mode != "sham":
+        print(
+            f"\nStimulation parameters "
+            f"(press Enter to accept default shown in [brackets]):"
+        )
+        prf_hz = _prompt("  PRF (Hz)", DEFAULT_PRF_HZ, int,
+                         lambda v: None if v > 0 else "must be > 0")
+        duty_cycle = _prompt("  Duty cycle (0-1)", DEFAULT_DUTY_CYCLE, float,
+                             lambda v: None if 0 < v <= 1 else "must be in (0, 1]")
+        input_vpp_mv = _prompt("  Voltage (mVpp)", DEFAULT_VPP_MV, int,
                                lambda v: None if v > 0 else "must be > 0")
+        center_freq_khz = _prompt("  Carrier frequency (kHz)", DEFAULT_FREQ_KHZ, int,
+                                  lambda v: None if v > 0 else "must be > 0")
+        total_exposure_s = _prompt("  Duration (s)", DEFAULT_DURATION_S, int,
+                                   lambda v: None if v > 0 else "must be > 0")
+    else:
+        prf_hz = DEFAULT_PRF_HZ
+        duty_cycle = DEFAULT_DUTY_CYCLE
+        input_vpp_mv = DEFAULT_VPP_MV
+        center_freq_khz = DEFAULT_FREQ_KHZ
+        total_exposure_s = DEFAULT_DURATION_S
 
     # 3. Audio mask
     print()
@@ -464,7 +472,12 @@ def interactive_config() -> Config:
     print("  Session summary")
     print("-" * 60)
     print(f"  Participant : {participant_id}")
-    print(f"  Hardware    : {'MOCK' if mock_hardware else 'REAL (Siglent AWG)'}")
+    hw_str = "MOCK"
+    if mode == "real":
+        hw_str = "REAL (Siglent AWG)"
+    elif mode == "sham":
+        hw_str = "SHAM (audio only, no US)"
+    print(f"  Hardware    : {hw_str}")
     print(f"  Carrier     : {center_freq_khz} kHz")
     print(f"  Voltage     : {input_vpp_mv} mVpp")
     print(f"  PRF         : {prf_hz} Hz")
